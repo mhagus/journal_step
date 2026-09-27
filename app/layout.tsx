@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { auth } from "@/auth";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,7 +56,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
   return (
     <html
       lang="en"
@@ -72,7 +74,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className="h-full text-white overflow-hidden">
-        <AuthProvider>
+        <AuthProvider session={session}>
           {children}
         </AuthProvider>
         <script
