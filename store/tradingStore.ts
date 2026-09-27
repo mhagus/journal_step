@@ -1,0 +1,90 @@
+"use client";
+
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { Trade, TradingMethod } from "@/types";
+import { mockTrades } from "@/data/mockTrades";
+import { mockMethods } from "@/data/mockMethods";
+
+interface TradingStore {
+  trades: Trade[];
+  methods: TradingMethod[];
+  sidebarCollapsed: boolean;
+
+  // Trade actions
+  addTrade: (trade: Omit<Trade, "id">) => void;
+  updateTrade: (id: string, trade: Partial<Trade>) => void;
+  deleteTrade: (id: string) => void;
+
+  // Method actions
+  addMethod: (method: Omit<TradingMethod, "id" | "createdAt">) => void;
+  updateMethod: (id: string, method: Partial<TradingMethod>) => void;
+  deleteMethod: (id: string) => void;
+
+  // UI actions
+  toggleSidebar: () => void;
+  setSidebarCollapsed: (collapsed: boolean) => void;
+}
+
+export const useTradingStore = create<TradingStore>()(
+  persist(
+    (set) => ({
+      trades: mockTrades,
+      methods: mockMethods,
+      sidebarCollapsed: false,
+
+      addTrade: (trade) =>
+        set((state) => ({
+          trades: [
+            { ...trade, id: `trade-${Date.now()}` },
+            ...state.trades,
+          ],
+        })),
+
+      updateTrade: (id, tradeUpdate) =>
+        set((state) => ({
+          trades: state.trades.map((t) =>
+            t.id === id ? { ...t, ...tradeUpdate } : t
+          ),
+        })),
+
+      deleteTrade: (id) =>
+        set((state) => ({
+          trades: state.trades.filter((t) => t.id !== id),
+        })),
+
+      addMethod: (method) =>
+        set((state) => ({
+          methods: [
+            {
+              ...method,
+              id: `method-${Date.now()}`,
+              createdAt: new Date().toISOString(),
+            },
+            ...state.methods,
+          ],
+        })),
+
+      updateMethod: (id, methodUpdate) =>
+        set((state) => ({
+          methods: state.methods.map((m) =>
+            m.id === id ? { ...m, ...methodUpdate } : m
+          ),
+        })),
+
+      deleteMethod: (id) =>
+        set((state) => ({
+          methods: state.methods.filter((m) => m.id !== id),
+        })),
+
+      toggleSidebar: () =>
+        set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+      setSidebarCollapsed: (collapsed) =>
+        set({ sidebarCollapsed: collapsed }),
+    }),
+    {
+      name: "step-traders-storage",
+    }
+  )
+);

@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* ─── New Dark Navy Palette ─── */
+    --bg-base: #020617;           /* slate-950 */
+    --bg-surface: #0f172a;        /* slate-900 */
+    --bg-card: rgba(15, 23, 42, 0.6);
+    --bg-card-hover: rgba(15, 23, 42, 0.8);
+
+    /* Accent: sky/cyan gradient */
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --ring: 199 89% 48%;
+
+    /* Text */
+    --foreground: 210 40% 96%;
+    --muted-foreground: 215 20% 55%;
+
+    /* Borders */
+    --border: 215 30% 14%;
+    --border-hover: 215 30% 22%;
+
+    /* Semantic */
+    --success: 142 71% 35%;
+    --destructive: 0 63% 50%;
+    --warning: 38 92% 50%;
+
+    /* Layout */
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 64px;
+    --radius: 0.625rem;
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: hsl(var(--border));
+  }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: hsl(var(--foreground));
+    font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Ambient radial glow — renders once behind all content */
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+
+  /* ─── Custom Scrollbar ─── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(215 30% 18%);
+    border-radius: 100px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(199 89% 48% / 0.4);
+  }
+}
+
+/* ─── Gradient Text ─── */
+.gradient-text {
+  background: linear-gradient(135deg, #38bdf8, #67e8f9, #93c5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-hero {
+  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 40%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Glow Effects ─── */
+.glow-blue {
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.12), 0 0 48px rgba(56, 189, 248, 0.05);
+}
+
+.glow-blue-strong {
+  box-shadow: 0 0 32px rgba(56, 189, 248, 0.25), 0 0 64px rgba(56, 189, 248, 0.1);
+}
+
+/* ─── Glassmorphism Cards ─── */
+.glass-card {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.08);
+}
+
+.glass-card-dark {
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+/* ─── Sidebar ─── */
+.sidebar-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Win/Loss Badges ─── */
+.badge-win {
+  background: hsl(142 71% 35% / 0.15);
+  color: hsl(142 71% 58%);
+  border: 1px solid hsl(142 71% 35% / 0.3);
+}
+.badge-loss {
+  background: hsl(0 63% 50% / 0.15);
+  color: hsl(0 63% 68%);
+  border: 1px solid hsl(0 63% 50% / 0.3);
+}
+.badge-breakeven {
+  background: hsl(38 92% 50% / 0.15);
+  color: hsl(38 92% 68%);
+  border: 1px solid hsl(38 92% 50% / 0.3);
+}
+
+/* ─── Chart Tooltips ─── */
+.recharts-tooltip-wrapper { outline: none; }
+
+/* ─── Input No Spinners ─── */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+/* ─── Auth / Login Page ─── */
+.auth-input {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  color: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-input:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+.auth-input::placeholder { color: rgba(148, 163, 184, 0.4); }
+
+/* ─── Ambient Orb Animations ─── */
+@keyframes orb-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+.orb-animate { animation: orb-pulse 6s ease-in-out infinite; }
+
+@keyframes orb-pulse-slow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.08); }
+}
+.orb-animate-slow { animation: orb-pulse-slow 9s ease-in-out infinite; }
+
+/* ─── Shimmer Loader ─── */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position:  200% 0; }
+}
+
+/* ─── Data Table Row Hover ─── */
+.data-table tr { transition: background-color 0.15s ease; }
+
+/* ─── Floating Card Entry Animation ─── */
+@keyframes float-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-float-in {
+  animation: float-in 0.5s ease forwards;
+}
