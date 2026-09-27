@@ -1,7 +1,10 @@
-import { auth } from "@/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/auth.config";
 import { NextResponse } from "next/server";
 
-// Routes that require authentication
+// Using the edge-compatible auth configuration
+const { auth } = NextAuth(authConfig);
+
 const PROTECTED_ROUTES = [
   "/dashboard",
   "/methods",
@@ -19,14 +22,14 @@ export default auth((req) => {
       nextUrl.pathname === route || nextUrl.pathname.startsWith(route + "/")
   );
 
-  // Redirect unauthenticated users to login
+  // Fallback / Redirect for unauthenticated users accessing private routes
   if (isProtected && !isLoggedIn) {
     const loginUrl = new URL("/", nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect logged-in users away from login page
+  // Redirect logged-in users away from root landing page
   if (nextUrl.pathname === "/" && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
   }
@@ -35,7 +38,7 @@ export default auth((req) => {
 });
 
 export const config = {
-  // Match all routes except static files and API routes
+  // Define matcher exactly as requested to exclude API auth, static assets, images, etc.
   matcher: [
     "/((?!api/auth|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons).*)",
   ],
