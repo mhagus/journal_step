@@ -9,7 +9,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { sidebarCollapsed } = useTradingStore();
 
   return (
-    <div className="flex h-full bg-[#09090b]">
+    <div className="flex h-full">
       <Sidebar />
       <div
         className={cn(

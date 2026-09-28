@@ -73,7 +73,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="msapplication-TileColor" content="#020617" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
-      <body className="h-full text-white overflow-hidden">
+      <body className="h-full text-white overflow-hidden bg-slate-950">
         <AuthProvider session={session}>
           {children}
         </AuthProvider>

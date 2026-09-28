@@ -14,6 +14,13 @@ export interface TradingMethod {
   tags?: string[];
 }
 
+export type TradePsychologyTag =
+  | "Sesuai Plan"
+  | "FOMO"
+  | "Revenge Trading"
+  | "Overleveraged"
+  | "Ragu-ragu";
+
 export interface Trade {
   id: string;
   date: string; // ISO string
@@ -27,6 +34,7 @@ export interface Trade {
   notes: string;
   screenshotUrl?: string;
   session?: string;
+  psychologyTags?: TradePsychologyTag[];
 }
 
 export interface EconomicEvent {

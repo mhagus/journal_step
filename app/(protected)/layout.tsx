@@ -2,7 +2,10 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 
-// Server-side auth check for the entire (protected) group
+/**
+ * Protected layout — wraps /journal, /methods, /evaluation, /news
+ * Hard-redirects unauthenticated users back to the root dashboard (soft-gate).
+ */
 export default async function ProtectedLayout({
   children,
 }: {

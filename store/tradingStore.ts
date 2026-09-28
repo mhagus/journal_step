@@ -3,8 +3,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Trade, TradingMethod } from "@/types";
-import { mockTrades } from "@/data/mockTrades";
-import { mockMethods } from "@/data/mockMethods";
 
 interface TradingStore {
   trades: Trade[];
@@ -29,8 +27,8 @@ interface TradingStore {
 export const useTradingStore = create<TradingStore>()(
   persist(
     (set) => ({
-      trades: mockTrades,
-      methods: mockMethods,
+      trades: [],    // starts empty — no mock data
+      methods: [],   // starts empty — no mock data
       sidebarCollapsed: false,
 
       addTrade: (trade) =>

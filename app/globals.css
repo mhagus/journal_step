@@ -46,15 +46,16 @@
   }
 
   body {
-    background-color: var(--bg-base);
+    background-color: #020617; /* slate-950, same as login page */
     color: hsl(var(--foreground));
     font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Ambient radial glow — renders once behind all content */
+    /* Ambient radial glows matching login page aesthetic */
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 50%);
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(56, 189, 248, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 90%, rgba(14, 165, 233, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 30% at 50% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 60%);
     background-attachment: fixed;
   }
 
