@@ -223,6 +223,32 @@ function TradeModal({ trade: editTrade, onClose }: TradeModalProps) {
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // ── Real-time result → pnl/pips sync ──────────────────────
+  const handleResultChange = (newResult: TradeResult) => {
+    setResult(newResult);
+
+    if (newResult === "Breakeven") {
+      // Lock PnL to 0 immediately
+      setPnl("0");
+      return;
+    }
+
+    // Sync PnL sign
+    const pnlNum = parseFloat(pnl);
+    if (!isNaN(pnlNum) && pnlNum !== 0) {
+      if (newResult === "Loss") {
+        // Force negative
+        setPnl((-Math.abs(pnlNum)).toString());
+      } else {
+        // Force positive for Win
+        setPnl(Math.abs(pnlNum).toString());
+      }
+    }
+
+    // Pips is always stored as absolute; sign is inferred from result
+    // No change needed to the pips field display
+  };
+
   const toggleTag = (tag: TradePsychologyTag) => {
     setPsychologyTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
@@ -236,15 +262,28 @@ function TradeModal({ trade: editTrade, onClose }: TradeModalProps) {
     if (!instrument.trim()) newErrors.instrument = "Instrumen wajib diisi";
     const rr = parseFloat(riskReward);
     if (isNaN(rr) || rr <= 0) newErrors.riskReward = "Masukkan rasio R:R yang valid";
-    const pnlNum = parseFloat(pnl);
-    if (isNaN(pnlNum)) newErrors.pnl = "Masukkan nilai PnL yang valid";
-    const pipsNum = parseFloat(pips);
-    if (pips && isNaN(pipsNum)) newErrors.pips = "Masukkan nilai pips yang valid";
+    const pnlRaw = parseFloat(pnl);
+    if (isNaN(pnlRaw)) newErrors.pnl = "Masukkan nilai PnL yang valid";
+    const pipsRaw = parseFloat(pips);
+    if (pips && isNaN(pipsRaw)) newErrors.pips = "Masukkan nilai pips yang valid";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
+
+    // ── Sanitize: enforce correct sign regardless of user input ──
+    const finalPnL =
+      result === "Loss"
+        ? -Math.abs(pnlRaw)
+        : result === "Breakeven"
+        ? 0
+        : Math.abs(pnlRaw);
+
+    const finalPips =
+      result === "Loss"
+        ? -Math.abs(pips ? pipsRaw : 0)
+        : Math.abs(pips ? pipsRaw : 0);
 
     const selectedMethod = methods.find((m) => m.id === methodId);
 
@@ -256,8 +295,8 @@ function TradeModal({ trade: editTrade, onClose }: TradeModalProps) {
       methodName: selectedMethod?.name,
       riskReward: rr,
       result,
-      pnl: pnlNum,
-      pips: pips ? Math.abs(pipsNum) : 0,
+      pnl: finalPnL,
+      pips: finalPips,
       notes: notes.trim(),
       screenshotUrl: screenshotUrl.trim(),
       session: session || undefined,
@@ -340,7 +379,7 @@ function TradeModal({ trade: editTrade, onClose }: TradeModalProps) {
                 key={res}
                 type="button"
                 id={`result-${res.toLowerCase()}`}
-                onClick={() => setResult(res)}
+                onClick={() => handleResultChange(res)}
                 className={cn(
                   "flex-1 h-9 rounded-lg text-xs font-medium transition-all border",
                   result === res
@@ -424,21 +463,74 @@ function TradeModal({ trade: editTrade, onClose }: TradeModalProps) {
           onChange={(e) => setRiskReward(e.target.value)}
           error={errors.riskReward}
         />
-        <Input
-          label="PnL ($)"
-          id="trade-pnl"
-          type="number"
-          step="0.01"
-          placeholder="250.00"
-          value={pnl}
-          onChange={(e) => setPnl(e.target.value)}
-          error={errors.pnl}
-        />
+
+        {/* PnL — dynamic label + border + readOnly for BE */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-slate-400">
+          <label
+            htmlFor="trade-pnl"
+            className={cn(
+              "text-xs font-medium transition-colors",
+              result === "Loss"
+                ? "text-red-400"
+                : result === "Breakeven"
+                ? "text-yellow-400"
+                : "text-slate-400"
+            )}
+          >
+            {result === "Loss"
+              ? "PnL ($) — Auto Minus"
+              : result === "Breakeven"
+              ? "PnL ($) — Dikunci 0"
+              : "PnL ($)"}
+          </label>
+          <input
+            id="trade-pnl"
+            type="number"
+            step="0.01"
+            placeholder="250.00"
+            value={pnl}
+            readOnly={result === "Breakeven"}
+            onChange={(e) => {
+              if (result === "Breakeven") return;
+              const raw = e.target.value;
+              if (result === "Loss") {
+                // Always keep negative while user types
+                const abs = Math.abs(parseFloat(raw) || 0);
+                setPnl(abs === 0 ? raw : (-abs).toString());
+              } else {
+                setPnl(raw);
+              }
+            }}
+            className={cn(
+              "h-9 w-full rounded-lg border px-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all",
+              result === "Breakeven"
+                ? "bg-slate-800/60 border-yellow-500/30 text-yellow-300 cursor-not-allowed focus:ring-yellow-500/30"
+                : result === "Loss"
+                ? "bg-slate-900 border-red-500/40 text-red-400 focus:ring-red-500/30 focus:border-red-500/50"
+                : "bg-slate-900 border-slate-700/80 text-white focus:ring-sky-500/50 focus:border-sky-500/50",
+              errors.pnl && "border-red-500/70"
+            )}
+          />
+          {errors.pnl && (
+            <p className="text-xs text-red-400">{errors.pnl}</p>
+          )}
+        </div>
+
+        {/* Pips — label reflects sign info */}
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="trade-pips"
+            className={cn(
+              "text-xs font-medium transition-colors",
+              result === "Loss" ? "text-red-400" : "text-slate-400"
+            )}
+          >
             Pips
             {result === "Loss" && (
-              <span className="ml-1 text-red-400 text-[10px]">(−auto)</span>
+              <span className="ml-1 font-bold text-[10px] bg-red-500/15 text-red-400 border border-red-500/30 rounded px-1 py-0.5">−AUTO</span>
+            )}
+            {result === "Win" && (
+              <span className="ml-1 font-bold text-[10px] bg-green-500/15 text-green-400 border border-green-500/30 rounded px-1 py-0.5">+AUTO</span>
             )}
           </label>
           <input
@@ -450,8 +542,13 @@ function TradeModal({ trade: editTrade, onClose }: TradeModalProps) {
             value={pips}
             onChange={(e) => setPips(e.target.value)}
             className={cn(
-              "h-9 w-full rounded-lg border border-slate-700/80 bg-slate-900 px-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500/50 transition-all",
-              errors.pips && "border-red-500/50"
+              "h-9 w-full rounded-lg border px-3 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all",
+              result === "Loss"
+                ? "bg-slate-900 border-red-500/40 text-red-400 focus:ring-red-500/30 focus:border-red-500/50"
+                : result === "Win"
+                ? "bg-slate-900 border-green-500/30 text-green-400 focus:ring-green-500/30 focus:border-green-500/50"
+                : "bg-slate-900 border-slate-700/80 text-white focus:ring-sky-500/50 focus:border-sky-500/50",
+              errors.pips && "border-red-500/70"
             )}
           />
           {errors.pips && (
