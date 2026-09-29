@@ -21,6 +21,8 @@ export type TradePsychologyTag =
   | "Overleveraged"
   | "Ragu-ragu";
 
+export type TradingSession = "Asia" | "London" | "New York";
+
 export interface Trade {
   id: string;
   date: string; // ISO string
@@ -31,11 +33,15 @@ export interface Trade {
   riskReward: number;
   result: TradeResult;
   pnl: number;
+  pips: number;
   notes: string;
   screenshotUrl?: string;
-  session?: string;
+  session?: TradingSession;
   psychologyTags?: TradePsychologyTag[];
 }
+
+/** Keyed by user email → starting capital in USD */
+export type InitialCapitalMap = Record<string, number>;
 
 export interface EconomicEvent {
   id: string;

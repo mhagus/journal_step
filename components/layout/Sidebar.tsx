@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
 import {
@@ -12,7 +13,6 @@ import {
   Newspaper,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
   Menu,
   X,
   LogIn,
@@ -112,17 +112,28 @@ export function Sidebar() {
           )}
         >
           <Link href="/" className="flex items-center gap-3 min-w-0">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/20 shrink-0">
-              <TrendingUp size={16} className="text-sky-400" />
-            </div>
-            {!sidebarCollapsed && (
-              <div className="min-w-0">
-                <span className="block text-sm font-bold text-white tracking-tight truncate">
-                  Step Traders
-                </span>
-                <span className="block text-[10px] text-slate-500 truncate">
-                  Trading Journal
-                </span>
+            {sidebarCollapsed ? (
+              /* Collapsed: show square icon only */
+              <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-sky-500/20">
+                <Image
+                  src="/icon.jpg"
+                  alt="Step Traders"
+                  width={32}
+                  height={32}
+                  className="w-full h-full object-cover"
+                  priority
+                />
+              </div>
+            ) : (
+              /* Expanded: show full logo */
+              <div className="relative h-8 w-36 shrink-0">
+                <Image
+                  src="/logo.jpg"
+                  alt="Step Traders"
+                  fill
+                  className="object-contain object-left"
+                  priority
+                />
               </div>
             )}
           </Link>

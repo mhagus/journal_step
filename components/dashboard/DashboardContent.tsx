@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Link from "next/link";
 import {
@@ -15,8 +15,10 @@ import {
   BarChart2,
   LogIn,
   BookOpen,
+  Wallet,
 } from "lucide-react";
 import { useTradingStore } from "@/store/tradingStore";
+import { getInitialCapital } from "@/store/tradingStore";
 import {
   calculateKPIs,
   calculateEquityCurve,
@@ -200,11 +202,23 @@ function EmptyTradesState({ isGuest }: { isGuest: boolean }) {
 export function DashboardContent() {
   const { data: session } = useSession();
   const isGuest = !session;
+  const userEmail = session?.user?.email;
 
   const { trades, methods } = useTradingStore();
 
+  // Initial capital (per-user localStorage)
+  const [initialCapital, setInitialCapitalState] = useState<number>(10000);
+  useEffect(() => {
+    setInitialCapitalState(getInitialCapital(userEmail));
+  }, [userEmail]);
+
   const kpis = useMemo(() => calculateKPIs(trades), [trades]);
-  const equityCurve = useMemo(() => calculateEquityCurve(trades), [trades]);
+  const equityCurve = useMemo(
+    () => calculateEquityCurve(trades, initialCapital),
+    [trades, initialCapital]
+  );
+  const totalPnl = useMemo(() => trades.reduce((sum, t) => sum + t.pnl, 0), [trades]);
+  const currentBalance = initialCapital + totalPnl;
 
   const recentTrades = trades.slice(0, 5);
 
@@ -232,6 +246,37 @@ export function DashboardContent() {
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/20 text-xs text-green-400">
           <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
           Market Buka
+        </div>
+      </div>
+
+      {/* KPI Cards — row 0: capital */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/50 px-5 py-4">
+          <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
+            <Wallet size={18} className="text-sky-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Modal Awal</p>
+            <p className="text-2xl font-bold text-white truncate">
+              ${initialCapital.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900/50 px-5 py-4">
+          <div className={cn("w-10 h-10 rounded-xl border flex items-center justify-center shrink-0",
+            currentBalance >= initialCapital ? "bg-green-500/10 border-green-500/20" : "bg-red-500/10 border-red-500/20")}>
+            <DollarSign size={18} className={currentBalance >= initialCapital ? "text-green-400" : "text-red-400"} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Saldo Saat Ini</p>
+            <p className={cn("text-2xl font-bold truncate",
+              currentBalance >= initialCapital ? "text-green-400" : "text-red-400")}>
+              ${currentBalance.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+          <span className={cn("text-xs font-semibold shrink-0", totalPnl >= 0 ? "text-green-400" : "text-red-400")}>
+            {totalPnl >= 0 ? "+" : ""}{formatCurrency(totalPnl)}
+          </span>
         </div>
       </div>
 
@@ -322,7 +367,7 @@ export function DashboardContent() {
             <div className="flex items-center justify-between">
               <CardTitle>Equity Curve</CardTitle>
               <span className="text-xs text-slate-500">
-                {trades.length === 0 ? "Belum ada data" : `Modal awal: $10,000`}
+                {trades.length === 0 ? "Belum ada data" : `Modal awal: $${initialCapital.toLocaleString("en-US", { minimumFractionDigits: 0 })}`}
               </span>
             </div>
           </CardHeader>
@@ -357,7 +402,7 @@ export function DashboardContent() {
                     width={48}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <ReferenceLine y={10000} stroke="#1e293b" strokeDasharray="4 4" />
+                  <ReferenceLine y={initialCapital} stroke="#1e293b" strokeDasharray="4 4" />
                   <Area
                     type="monotone"
                     dataKey="equity"

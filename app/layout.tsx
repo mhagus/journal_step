@@ -34,6 +34,15 @@ export const metadata: Metadata = {
   creator: "Step Traders",
   publisher: "Step Traders",
   manifest: "/manifest.json",
+  icons: {
+    icon: [
+      { url: "/icon.jpg", type: "image/jpeg" },
+    ],
+    apple: [
+      { url: "/icon.jpg", type: "image/jpeg" },
+    ],
+    shortcut: "/icon.jpg",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -45,6 +54,13 @@ export const metadata: Metadata = {
     siteName: "Step Traders",
     title: "Step Traders | Professional Trading Journal",
     description: "Track, analyze, and improve your trading performance with Step Traders.",
+    images: [{ url: "/logo.jpg", width: 1400, height: 788, alt: "Step Traders" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Step Traders | Professional Trading Journal",
+    description: "Track, analyze, and improve your trading performance with Step Traders.",
+    images: ["/logo.jpg"],
   },
 };
 
@@ -66,7 +82,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <link rel="icon" type="image/jpeg" href="/icon.jpg" />
+        <link rel="apple-touch-icon" href="/icon.jpg" />
+        <link rel="shortcut icon" href="/icon.jpg" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="mobile-web-app-capable" content="yes" />

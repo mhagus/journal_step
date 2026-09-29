@@ -4,6 +4,37 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Trade, TradingMethod } from "@/types";
 
+/* ─── Initial Capital helpers (per-user, outside main persist store) ─── */
+const IC_KEY = "step-traders-initial-capital";
+
+export function getInitialCapital(email: string | undefined | null): number {
+  if (typeof window === "undefined" || !email) return 10000;
+  try {
+    const raw = localStorage.getItem(IC_KEY);
+    const map: Record<string, number> = raw ? JSON.parse(raw) : {};
+    return map[email] ?? 10000;
+  } catch {
+    return 10000;
+  }
+}
+
+export function setInitialCapital(
+  email: string | undefined | null,
+  value: number
+): void {
+  if (typeof window === "undefined" || !email) return;
+  try {
+    const raw = localStorage.getItem(IC_KEY);
+    const map: Record<string, number> = raw ? JSON.parse(raw) : {};
+    map[email] = value;
+    localStorage.setItem(IC_KEY, JSON.stringify(map));
+  } catch {
+    // ignore
+  }
+}
+
+/* ─── Zustand Store ──────────────────────────────────────────────────── */
+
 interface TradingStore {
   trades: Trade[];
   methods: TradingMethod[];

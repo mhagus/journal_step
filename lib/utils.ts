@@ -78,12 +78,15 @@ export function calculateKPIs(trades: Trade[]): KPIData {
   };
 }
 
-export function calculateEquityCurve(trades: Trade[]): EquityPoint[] {
+export function calculateEquityCurve(
+  trades: Trade[],
+  startingCapital = 10000
+): EquityPoint[] {
   const sorted = [...trades].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  let equity = 10000; // Starting capital
+  let equity = startingCapital;
   return sorted.map((trade, index) => {
     equity += trade.pnl;
     return {
@@ -95,6 +98,14 @@ export function calculateEquityCurve(trades: Trade[]): EquityPoint[] {
       trade: index + 1,
     };
   });
+}
+
+export function calculateTotalPips(trades: Trade[]): number {
+  return trades.reduce((sum, t) => {
+    // Loss pips are negative, Win/BE pips are positive
+    const pipValue = t.pips ?? 0;
+    return sum + (t.result === "Loss" ? -Math.abs(pipValue) : Math.abs(pipValue));
+  }, 0);
 }
 
 export function calculateMethodPerformance(
